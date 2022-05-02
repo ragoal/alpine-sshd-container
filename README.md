@@ -12,12 +12,11 @@ RUN mkdir -p /root/.ssh \
     && ssh-keygen -A \
     && echo -e "PasswordAuthentication no" >> /etc/ssh/sshd_config \
     && mkdir -p /run/openrc \
-    && touch /run/openrc/softlevel \
-    && rc-status
+    && touch /run/openrc/softlevel
+RUN rc-status
 
-CMD ["rc-service", "sshd", "start"]
-CMD ["tail", "-f", "/dev/null"]
-ENTRYPOINT ["sh", "-c", "rc-status; rc-service sshd start; sh"]
+ENTRYPOINT ["sh", "-c", "rc-service sshd restart && tail -f /dev/null"]
+
 ```
 crear imagen pasando como argumento nuestra clave pública ssh
 ```
@@ -25,7 +24,7 @@ docker build --build-arg ssh_pub_key="$(cat ~/.ssh/id_rsa.pub)" -t alpine1 .
 ```
 Ejecutar el contendor con la imagen creada y elegir el puerto donde publicará el servicio ssh
 ```
-docker run -dit --name alpine-ssh -p 7655:22 alpine1
+docker run -d --name alpine-ssh -p 7655:22 alpine1
 ```
 sentencia ansible para validar ping, la primera vez nos pedirá validar host ssh
 ```
@@ -35,3 +34,29 @@ configurar el fichero de inventario asbile
 ```
 alpine1 ansible_port=7655 ansible_host=192.168.1.35 ansible_user=root
 ```
+
+# Creación con docker-compose
+
+```
+docker-compose.yml
+version: "3.3"
+services:
+  web:
+    build:
+      context: .
+      args:
+        ssh_pub_key: "${RSA}"
+    image: alpine_ssh_2
+    ports:
+      - "7655:22"
+```
+
+volcar en variable de entorno RSA la id_rsa.pub
+```
+export RSA=$(cat ~/.ssh/id_rsa.pub)
+```
+Levantar contenedor
+
+docker-compose up -d --build 
+
+
