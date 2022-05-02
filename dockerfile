@@ -1,6 +1,16 @@
 FROM alpine:latest
-RUN apk update && apk add openssh && apk add openrc
-RUN mkdir -p /home/root/.ssh && ln -s /run/secrets/user_ssh_key /home/root/.ssh/id_rsa.pub
-RUN chown -R root:root /home/root/.ssh
-EXPOSE 22
-CMD ["sh"]
+ARG ssh_pub_key
+
+RUN mkdir -p /root/.ssh \
+    && chmod 0700 /root/.ssh \
+    && passwd -u root \
+    && echo "$ssh_pub_key" > /root/.ssh/authorized_keys \
+    && apk add openrc openssh \
+    && ssh-keygen -A \
+    && echo -e "PasswordAuthentication no" >> /etc/ssh/sshd_config \
+    && mkdir -p /run/openrc \
+    && touch /run/openrc/softlevel \
+    && rc-status \
+    && rc-service sshd restart
+CMD ["rc-service sshd restart"]
+
