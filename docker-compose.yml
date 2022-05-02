@@ -1,0 +1,10 @@
+version: "3.3"
+services:
+  web:
+    build: 
+      context: .
+      args:
+        ssh_pub_key: "${RSA}"
+    image: alpine_ssh_2
+    ports:
+      - "7655:22"

@@ -9,9 +9,7 @@ RUN mkdir -p /root/.ssh \
     && ssh-keygen -A \
     && echo -e "PasswordAuthentication no" >> /etc/ssh/sshd_config \
     && mkdir -p /run/openrc \
-    && touch /run/openrc/softlevel \
-    && rc-status 
+    && touch /run/openrc/softlevel
+RUN rc-status
 
-CMD ["rc-service", "sshd", "start"]
-CMD ["tail", "-f", "/dev/null"]
-ENTRYPOINT ["sh", "-c", "rc-status; rc-service sshd start; sh"]
+ENTRYPOINT ["sh", "-c", "rc-service sshd restart && tail -f /dev/null"]
