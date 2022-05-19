@@ -48,15 +48,19 @@ services:
         ssh_pub_key: "${RSA}"
     image: alpine_ssh_2
     ports:
-      - "7655:22"
+      - "${SSH_PORT}:22"
 ```
 
 volcar en variable de entorno RSA la id_rsa.pub
 ```
 export RSA=$(cat ~/.ssh/id_rsa.pub)
 ```
+variable puerto a exponer el ssh del contendor
+```
+export SSH-PORT=7655
+```
 Levantar contenedor
-
+```
 docker-compose up -d --build 
-
+```
 

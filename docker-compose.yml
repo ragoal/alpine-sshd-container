@@ -7,4 +7,4 @@ services:
         ssh_pub_key: "${RSA}"
     image: alpine_ssh_2
     ports:
-      - "7655:22"
+      - "${SSH_PORT}:22"
